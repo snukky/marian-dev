@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <string>
 
 #include "common/options.h"
 #include "common/utils.h"
@@ -16,9 +17,7 @@ public:
   OutputPrinter(Ptr<Options> options, Ptr<Vocab> vocab)
       : vocab_(vocab),
         reverse_(options->get<bool>("right-left")),
-        nbest_(options->get<bool>("n-best", false)
-                   ? options->get<size_t>("beam-size")
-                   : 0),
+        nbest_(options->get<bool>("n-best", false) ? options->get<size_t>("beam-size") : 0),
         alignment_(options->get<std::string>("alignment", "")),
         alignmentThreshold_(getAlignmentThreshold(alignment_)) {}
 
@@ -72,6 +71,26 @@ public:
       best1 << " ||| " << getAlignment(hypo);
     }
     best1 << std::flush;
+  }
+
+  std::vector<std::pair<std::string, float>> print(Ptr<History> history) {
+    std::vector<std::pair<std::string, float>> results;
+    const auto& nbl = history->NBest(nbest_);
+
+    for(size_t i = 0; i < nbl.size(); ++i) {
+      const auto& result = nbl[i];
+      auto words = std::get<0>(result);
+
+      if(reverse_)
+        std::reverse(words.begin(), words.end());
+
+      std::string translation = vocab_->decode(words);
+      float score = std::get<2>(result);
+
+      results.push_back(std::make_pair(translation, score));
+    }
+
+    return results;
   }
 
 private:

@@ -149,7 +149,11 @@ target_compile_options(marian_conv PUBLIC ${ALL_WARNINGS})
 add_executable(marian_adaptive command/marian_adaptive.cpp)
 set_target_properties(marian_adaptive PROPERTIES OUTPUT_NAME marian-adaptive)
 
-set(EXECUTABLES ${EXECUTABLES} marian_train marian_decoder marian_scorer marian_vocab marian_conv marian_adaptive)
+add_executable(marian_iterative command/marian_iterative.cpp)
+set_target_properties(marian_iterative PROPERTIES OUTPUT_NAME marian-iterative)
+target_compile_options(marian_iterative PUBLIC ${ALL_WARNINGS})
+
+set(EXECUTABLES ${EXECUTABLES} marian_train marian_decoder marian_scorer marian_vocab marian_conv marian_adaptive marian_iterative)
 
 # marian.zip and marian.tgz
 # This combines marian, marian_decoder in a single ZIP or TAR file for

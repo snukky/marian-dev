@@ -76,6 +76,7 @@ private:
   void addOptionsValidation(cli::CLIWrapper&);
   void addOptionsTranslation(cli::CLIWrapper&);
   void addOptionsScoring(cli::CLIWrapper&);
+  void addOptionsIterative(cli::CLIWrapper&);
 
   void addSuboptionsDevices(cli::CLIWrapper&);
   void addSuboptionsBatching(cli::CLIWrapper&);

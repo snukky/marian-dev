@@ -706,6 +706,17 @@ void ConfigParser::addSuboptionsULR(cli::CLIWrapper& cli) {
   // clang-format on
 }
 
+void ConfigParser::addOptionsIterative(cli::CLIWrapper& cli) {
+  // clang-format off
+  cli.add<size_t>("--iterative-max",
+      "Maximum number of iterations in iterative decoding",
+      5);
+  cli.add<float>("--iterative-threshold",
+      "Threshold for the cost of a non-identity decoded sentence to be replaced with the original sentence",
+      1.0f);
+  // clang-format on
+}
+
 void ConfigParser::expandAliases(cli::CLIWrapper& cli) {
   YAML::Node config;
   // The order of aliases does matter as later options overwrite earlier
@@ -747,6 +758,7 @@ void ConfigParser::parseOptions(int argc, char** argv, bool doValidate) {
       break;
     case cli::mode::translation:
       addOptionsTranslation(cli);
+      addOptionsIterative(cli);
       break;
     case cli::mode::scoring:
       addOptionsScoring(cli);
