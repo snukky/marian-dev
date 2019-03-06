@@ -714,6 +714,9 @@ void ConfigParser::addOptionsIterative(cli::CLIWrapper& cli) {
   cli.add<float>("--iterative-threshold",
       "Threshold for the cost of a non-identity decoded sentence to be replaced with the original sentence",
       1.0f);
+  cli.add<bool>("--iterative-debug",
+      "Print debug information to standard error",
+      false);
   // clang-format on
 }
 

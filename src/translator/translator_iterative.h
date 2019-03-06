@@ -100,6 +100,7 @@ public:
 
     auto maxIter = options_->get<size_t>("iterative-max");
     auto threshold = options_->get<float>("iterative-threshold");
+    auto debug = options_->get<bool>("iterative-debug");
 
     for(auto batch : bg) {
       auto task = [=](size_t id) {
@@ -112,16 +113,20 @@ public:
         }
 
         std::string inputNext = trgVocab_->decode(batch->front()->data());
-        //std::cerr << "Original input: " << inputNext << std::endl;
+
+        if(debug)
+          std::cerr << "Original input: " << inputNext << std::endl;
 
         size_t iter = 0;
 
         std::string output;
         Ptr<History> outputHistory;
 
-        while(iter < maxIter) {
-          std::cerr << "== Iteration " << iter + 1 << " ==" << std::endl;
-          std::cerr << "Input: " << inputNext << std::endl;
+        do {
+          if(debug) {
+            std::cerr << "== Iteration " << iter + 1 << "/" << maxIter << " ==" << std::endl
+                      << "Input: " << inputNext << std::endl;
+          }
 
           auto inputText = New<data::TextInput>(std::vector<std::string>({inputNext}), vocabs_, options_);
           auto inputGen = New<data::BatchGenerator<data::TextInput>>(inputText, options_);
@@ -138,26 +143,34 @@ public:
           for(auto const& transWithScore : nbestlist) {
             const std::string& trans = transWithScore.first;
             const float& score = transWithScore.second;
-            std::cerr << trans << "\t" << score << std::endl;
+
+            if(debug)
+              std::cerr << trans << "\t" << score;
 
             if(trans == inputNext) {
-              //std::cerr << "  IDENTITY\n";
+              if(debug)
+                std::cerr << "\t<- identity";
               costId = score;
             } else if(costNonId < score) {
-              //std::cerr << "  NON IDENTITY\n";
+              if(debug)
+                std::cerr << "\t<- best non-identity";
               costNonId = score;
               inputNonId = trans;
               historyNonId = history;
             }
+            if(debug)
+              std::cerr << std::endl;
           }
 
-          std::cerr << "CostId= " << costId << " CostNonId= " << costNonId
-                    << " Div= " << costNonId / costId << " < " << threshold << " ?" << std::endl;
+          if(debug)
+            std::cerr << "Checking if costNonId / costId < " << threshold << " : "
+                      << costNonId / costId << std::endl;
 
           if((costNonId / costId) < threshold) {
             output = inputNonId;
             outputHistory = historyNonId;
-            //std::cerr << "  REWRITE!" << std::endl;
+            if(debug)
+              std::cerr << "Rewriting best output: " << output << std::endl;
           } else {
             output = inputNext;
             outputHistory = history;
@@ -165,20 +178,18 @@ public:
 
           if(inputNext == output)
             break;
-
           inputNext = output;
-          ++iter;
-        }
 
-        std::cerr << "Final output: " << output << std::endl;
+          ++iter;
+        } while(iter < maxIter);
+
+        if(debug)
+          std::cerr << "Final output: " << output << std::endl;
 
         std::stringstream best1;
         std::stringstream bestn;
         printer->print(outputHistory, best1, bestn);
-        collector->Write((long)outputHistory->GetLineNum(),
-                         best1.str(),
-                         bestn.str(),
-                         options_->get<bool>("n-best"));
+        collector->Write(id, best1.str(), bestn.str(), options_->get<bool>("n-best"));
       };
 
       threadPool.enqueue(task, batchId++);
