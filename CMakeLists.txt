@@ -60,14 +60,15 @@ endif()
 # Set compilation flags
 if(MSVC)
 # These are used in src/CMakeLists.txt on a per-target basis
-  list(APPEND ALL_WARNINGS /WX; /W4;)
+  list(APPEND ALL_WARNINGS /WX; /W4; /Wv:18;)
 
   # Disabled bogus warnings for CPU intrincics:
   # C4310: cast truncates constant value
   # C4324: 'marian::cpu::int16::`anonymous-namespace'::ScatterPut': structure was padded due to alignment specifier
-  set(DISABLE_GLOBALLY "/wd\"4310\" /wd\"4324\"")
+  set(DISABLE_GLOBALLY "/wd\"4310\" /wd\"4324\" /wd\"4244\" /wd\"4267\" /wd\"4834\" /wd\"4100\" /wd\"4996\" /wd\"4706\" /wd\"4702\"")
 
   set(INTRINSICS "/arch:AVX")
+  add_definitions(-DUSE_SSE2=1)
 
   # Or maybe use these?
   # set(INTRINSICS "/arch:AVX2")
