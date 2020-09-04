@@ -112,7 +112,8 @@ jobs:
 
     # Mock task
     - name: Create archive
-      run: zip ${{ matrix.name }}.zip README.md VERSION
+      run: 7z a ${{ matrix.name }}.zip README.md VERSION
+      shell: powershell
 
     - name: Upload archive
       uses: actions/upload-artifact@v2
