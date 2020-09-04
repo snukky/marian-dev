@@ -1,0 +1,91 @@
+name: Release
+
+on:
+  push:
+    branches: [ master ]
+    #tags:
+      #- "test-v*.*.*"
+
+jobs:
+  build-release-ubuntu:
+    runs-on: ubuntu-18.04
+
+    strategy:
+      matrix:
+        include:
+          - name: ${{ github.event.repository.name }}-${{ github.ref }}_linux-x64_cpu
+            fbgemm: false
+            cuda: false
+          - name: ${{ github.event.repository.name }}-${{ github.ref }}_linux-x64_cpu-fbgemm
+            fbgemm: true
+            cuda: false
+          #- name: ${{ github.event.repository.name }}-${{ github.ref }}_linux-x64_cuda10.2
+            #fbgemm: false
+            #cuda: true
+          #- name: ${{ github.event.repository.name }}-${{ github.ref }}_linux-x64_cuda10.2-fbgemm
+            #fbgemm: true
+            #cuda: true
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+      with:
+        submodules: recursive
+
+    # Mock task
+    - name: Create archive
+      run: tar zcvf ${{ matrix.name }}.tar.gz README.md VERSION
+
+    - name: Upload archive
+      uses: actions/upload-artifact@v2
+      with:
+        name: ${{ matrix.name }}.tar.gz
+        path: ${{ matrix.name }}.tar.gz
+
+  build-release-windows:
+    runs-on: windows-2019
+
+    strategy:
+      matrix:
+        include:
+          - name: ${{ github.event.repository.name }}-${{ github.ref }}_windows-x64_cpu
+            fbgemm: false
+            cuda: false
+          - name: ${{ github.event.repository.name }}-${{ github.ref }}_windows-x64_cpu-fbgemm
+            fbgemm: true
+            cuda: false
+          #- name: ${{ github.event.repository.name }}-${{ github.ref }}_windows-x64_cuda10.2
+            #fbgemm: false
+            #cuda: true
+          #- name: ${{ github.event.repository.name }}-${{ github.ref }}_windows-x64_cuda10.2-fbgemm
+            #fbgemm: true
+            #cuda: true
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+      with:
+        submodules: recursive
+
+    # Mock task
+    - name: Create archive
+      run: zip ${{ matrix.name }}.zip README.md VERSION
+
+    - name: Upload archive
+      uses: actions/upload-artifact@v2
+      with:
+        name: ${{ matrix.name }}.zip
+        path: ${{ matrix.name }}.zip
+
+  release:
+    needs: [build-release-ubuntu, build-release-windows]
+
+    runs-on: ubuntu-18.04
+
+    steps:
+      # Downloads all artifacts to the current working directory
+      - name: Download archives
+        uses: actions/download-artifact@v2
+
+      - name: List archives
+        run: ls -R
+
