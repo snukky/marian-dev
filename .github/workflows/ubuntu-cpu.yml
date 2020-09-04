@@ -1,8 +1,8 @@
 name: Ubuntu 18.04 CPU-only
 
 on:
-  push:
-    branches: [ master ]
+  #push:
+    #branches: [ master ]
   pull_request:
     branches: [ master ]
 

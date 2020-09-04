@@ -1,8 +1,8 @@
 name: macOS CPU-only
 
 on:
-  push:
-    branches: [ master ]
+  #push:
+    #branches: [ master ]
   pull_request:
     branches: [ master ]
 

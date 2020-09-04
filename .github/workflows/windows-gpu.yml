@@ -1,8 +1,8 @@
 name: Windows CPU+CUDA
 
 on:
-  push:
-    branches: [ master ]
+  #push:
+    #branches: [ master ]
   pull_request:
     branches: [ master ]
 
