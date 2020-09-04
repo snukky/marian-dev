@@ -13,16 +13,16 @@ jobs:
     strategy:
       matrix:
         include:
-          - name: ${{ github.repository_owner }}-${{ github.ref }}_linux-x64_cpu
+          - name: ${{ github.event.repository.name }}-v0.0.0_linux-x64_cpu
             fbgemm: false
             cuda: false
-          - name: ${{ github.repository_owner }}-${{ github.ref }}_linux-x64_cpu-fbgemm
+          - name: ${{ github.event.repository.name }}-v0.0.0_linux-x64_cpu-fbgemm
             fbgemm: true
             cuda: false
-          #- name: ${{ github.repository_owner }}-${{ github.ref }}_linux-x64_cuda10.2
+          #- name: ${{ github.event.repository.name }}-v0.0.0_linux-x64_cuda10.2
             #fbgemm: false
             #cuda: true
-          #- name: ${{ github.repository_owner }}-${{ github.ref }}_linux-x64_cuda10.2-fbgemm
+          #- name: ${{ github.event.repository.name }}-v0.0.0_linux-x64_cuda10.2-fbgemm
             #fbgemm: true
             #cuda: true
 
@@ -70,16 +70,16 @@ jobs:
     strategy:
       matrix:
         include:
-          - name: ${{ github.repository_owner }}-${{ github.ref }}_windows-x64_cpu
+          - name: ${{ github.event.repository.name }}-v0.0.0_windows-x64_cpu
             fbgemm: false
             cuda: false
-          - name: ${{ github.repository_owner }}-${{ github.ref }}_windows-x64_cpu-fbgemm
+          - name: ${{ github.event.repository.name }}-v0.0.0_windows-x64_cpu-fbgemm
             fbgemm: true
             cuda: false
-          #- name: ${{ github.repository_owner }}-${{ github.ref }}_windows-x64_cuda10.2
+          #- name: ${{ github.event.repository.name }}-v0.0.0_windows-x64_cuda10.2
             #fbgemm: false
             #cuda: true
-          #- name: ${{ github.repository_owner }}-${{ github.ref }}_windows-x64_cuda10.2-fbgemm
+          #- name: ${{ github.event.repository.name }}-v0.0.0_windows-x64_cuda10.2-fbgemm
             #fbgemm: true
             #cuda: true
     steps:
