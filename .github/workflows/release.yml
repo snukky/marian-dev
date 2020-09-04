@@ -79,7 +79,7 @@ jobs:
           #- name: ${{ github.repository_owner }}-${{ github.ref }}_windows-x64_cuda10.2
             #fbgemm: false
             #cuda: true
-         - name: ${{ github.repository_owner }}-${{ github.ref }}_windows-x64_cuda10.2-fbgemm
+          #- name: ${{ github.repository_owner }}-${{ github.ref }}_windows-x64_cuda10.2-fbgemm
             #fbgemm: true
             #cuda: true
     steps:
