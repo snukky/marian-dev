@@ -13,20 +13,42 @@ jobs:
     strategy:
       matrix:
         include:
-          - name: ${{ github.event.repository.name }}-${{ github.ref }}_linux-x64_cpu
+          - name: ${{ github.repository_owner }}-${{ github.ref }}_linux-x64_cpu
             fbgemm: false
             cuda: false
-          - name: ${{ github.event.repository.name }}-${{ github.ref }}_linux-x64_cpu-fbgemm
+          - name: ${{ github.repository_owner }}-${{ github.ref }}_linux-x64_cpu-fbgemm
             fbgemm: true
             cuda: false
-          #- name: ${{ github.event.repository.name }}-${{ github.ref }}_linux-x64_cuda10.2
+          #- name: ${{ github.repository_owner }}-${{ github.ref }}_linux-x64_cuda10.2
             #fbgemm: false
             #cuda: true
-          #- name: ${{ github.event.repository.name }}-${{ github.ref }}_linux-x64_cuda10.2-fbgemm
+          #- name: ${{ github.repository_owner }}-${{ github.ref }}_linux-x64_cuda10.2-fbgemm
             #fbgemm: true
             #cuda: true
 
     steps:
+      - name: Dump GitHub context
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+          JOB_CONTEXT: ${{ toJson(job) }}
+          STEPS_CONTEXT: ${{ toJson(steps) }}
+          RUNNER_CONTEXT: ${{ toJson(runner) }}
+          STRATEGY_CONTEXT: ${{ toJson(strategy) }}
+          MATRIX_CONTEXT: ${{ toJson(matrix) }}
+        run: |
+          echo "### GITHUB_CONTEXT"
+          echo "$GITHUB_CONTEXT"
+          echo "### JOB_CONTEXT"
+          echo "$JOB_CONTEXT"
+          echo "### STEPS_CONTEXT"
+          echo "$STEPS_CONTEXT"
+          echo "### RUNNER_CONTEXT"
+          echo "$RUNNER_CONTEXT"
+          echo "### STRATEGY_CONTEXT"
+          echo "$STRATEGY_CONTEXT"
+          echo "### MATRIX_CONTEXT"
+          echo "$MATRIX_CONTEXT"
+
     - name: Checkout
       uses: actions/checkout@v2
       with:
@@ -48,19 +70,41 @@ jobs:
     strategy:
       matrix:
         include:
-          - name: ${{ github.event.repository.name }}-${{ github.ref }}_windows-x64_cpu
+          - name: ${{ github.repository_owner }}-${{ github.ref }}_windows-x64_cpu
             fbgemm: false
             cuda: false
-          - name: ${{ github.event.repository.name }}-${{ github.ref }}_windows-x64_cpu-fbgemm
+          - name: ${{ github.repository_owner }}-${{ github.ref }}_windows-x64_cpu-fbgemm
             fbgemm: true
             cuda: false
-          #- name: ${{ github.event.repository.name }}-${{ github.ref }}_windows-x64_cuda10.2
+          #- name: ${{ github.repository_owner }}-${{ github.ref }}_windows-x64_cuda10.2
             #fbgemm: false
             #cuda: true
-          #- name: ${{ github.event.repository.name }}-${{ github.ref }}_windows-x64_cuda10.2-fbgemm
+          #- name: ${{ github.repository_owner }}-${{ github.ref }}_windows-x64_cuda10.2-fbgemm
             #fbgemm: true
             #cuda: true
     steps:
+      - name: Dump GitHub context
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+          JOB_CONTEXT: ${{ toJson(job) }}
+          STEPS_CONTEXT: ${{ toJson(steps) }}
+          RUNNER_CONTEXT: ${{ toJson(runner) }}
+          STRATEGY_CONTEXT: ${{ toJson(strategy) }}
+          MATRIX_CONTEXT: ${{ toJson(matrix) }}
+        run: |
+          echo "### GITHUB_CONTEXT"
+          echo "$GITHUB_CONTEXT"
+          echo "### JOB_CONTEXT"
+          echo "$JOB_CONTEXT"
+          echo "### STEPS_CONTEXT"
+          echo "$STEPS_CONTEXT"
+          echo "### RUNNER_CONTEXT"
+          echo "$RUNNER_CONTEXT"
+          echo "### STRATEGY_CONTEXT"
+          echo "$STRATEGY_CONTEXT"
+          echo "### MATRIX_CONTEXT"
+          echo "$MATRIX_CONTEXT"
+
     - name: Checkout
       uses: actions/checkout@v2
       with:
@@ -88,4 +132,3 @@ jobs:
 
       - name: List archives
         run: ls -R
-
