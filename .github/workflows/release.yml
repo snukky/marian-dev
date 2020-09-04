@@ -27,27 +27,27 @@ jobs:
             #cuda: true
 
     steps:
-      - name: Dump GitHub context
-        env:
-          GITHUB_CONTEXT: ${{ toJson(github) }}
-          JOB_CONTEXT: ${{ toJson(job) }}
-          STEPS_CONTEXT: ${{ toJson(steps) }}
-          RUNNER_CONTEXT: ${{ toJson(runner) }}
-          STRATEGY_CONTEXT: ${{ toJson(strategy) }}
-          MATRIX_CONTEXT: ${{ toJson(matrix) }}
-        run: |
-          echo "### GITHUB_CONTEXT"
-          echo "$GITHUB_CONTEXT"
-          echo "### JOB_CONTEXT"
-          echo "$JOB_CONTEXT"
-          echo "### STEPS_CONTEXT"
-          echo "$STEPS_CONTEXT"
-          echo "### RUNNER_CONTEXT"
-          echo "$RUNNER_CONTEXT"
-          echo "### STRATEGY_CONTEXT"
-          echo "$STRATEGY_CONTEXT"
-          echo "### MATRIX_CONTEXT"
-          echo "$MATRIX_CONTEXT"
+    - name: Dump GitHub context
+      env:
+        GITHUB_CONTEXT: ${{ toJson(github) }}
+        JOB_CONTEXT: ${{ toJson(job) }}
+        STEPS_CONTEXT: ${{ toJson(steps) }}
+        RUNNER_CONTEXT: ${{ toJson(runner) }}
+        STRATEGY_CONTEXT: ${{ toJson(strategy) }}
+        MATRIX_CONTEXT: ${{ toJson(matrix) }}
+      run: |
+        echo "### GITHUB_CONTEXT"
+        echo "$GITHUB_CONTEXT"
+        echo "### JOB_CONTEXT"
+        echo "$JOB_CONTEXT"
+        echo "### STEPS_CONTEXT"
+        echo "$STEPS_CONTEXT"
+        echo "### RUNNER_CONTEXT"
+        echo "$RUNNER_CONTEXT"
+        echo "### STRATEGY_CONTEXT"
+        echo "$STRATEGY_CONTEXT"
+        echo "### MATRIX_CONTEXT"
+        echo "$MATRIX_CONTEXT"
 
     - name: Checkout
       uses: actions/checkout@v2
@@ -79,31 +79,31 @@ jobs:
           #- name: ${{ github.repository_owner }}-${{ github.ref }}_windows-x64_cuda10.2
             #fbgemm: false
             #cuda: true
-          #- name: ${{ github.repository_owner }}-${{ github.ref }}_windows-x64_cuda10.2-fbgemm
+         - name: ${{ github.repository_owner }}-${{ github.ref }}_windows-x64_cuda10.2-fbgemm
             #fbgemm: true
             #cuda: true
     steps:
-      - name: Dump GitHub context
-        env:
-          GITHUB_CONTEXT: ${{ toJson(github) }}
-          JOB_CONTEXT: ${{ toJson(job) }}
-          STEPS_CONTEXT: ${{ toJson(steps) }}
-          RUNNER_CONTEXT: ${{ toJson(runner) }}
-          STRATEGY_CONTEXT: ${{ toJson(strategy) }}
-          MATRIX_CONTEXT: ${{ toJson(matrix) }}
-        run: |
-          echo "### GITHUB_CONTEXT"
-          echo "$GITHUB_CONTEXT"
-          echo "### JOB_CONTEXT"
-          echo "$JOB_CONTEXT"
-          echo "### STEPS_CONTEXT"
-          echo "$STEPS_CONTEXT"
-          echo "### RUNNER_CONTEXT"
-          echo "$RUNNER_CONTEXT"
-          echo "### STRATEGY_CONTEXT"
-          echo "$STRATEGY_CONTEXT"
-          echo "### MATRIX_CONTEXT"
-          echo "$MATRIX_CONTEXT"
+    - name: Dump GitHub context
+      env:
+        GITHUB_CONTEXT: ${{ toJson(github) }}
+        JOB_CONTEXT: ${{ toJson(job) }}
+        STEPS_CONTEXT: ${{ toJson(steps) }}
+        RUNNER_CONTEXT: ${{ toJson(runner) }}
+        STRATEGY_CONTEXT: ${{ toJson(strategy) }}
+        MATRIX_CONTEXT: ${{ toJson(matrix) }}
+      run: |
+        echo "### GITHUB_CONTEXT"
+        echo "$GITHUB_CONTEXT"
+        echo "### JOB_CONTEXT"
+        echo "$JOB_CONTEXT"
+        echo "### STEPS_CONTEXT"
+        echo "$STEPS_CONTEXT"
+        echo "### RUNNER_CONTEXT"
+        echo "$RUNNER_CONTEXT"
+        echo "### STRATEGY_CONTEXT"
+        echo "$STRATEGY_CONTEXT"
+        echo "### MATRIX_CONTEXT"
+        echo "$MATRIX_CONTEXT"
 
     - name: Checkout
       uses: actions/checkout@v2
@@ -127,8 +127,8 @@ jobs:
 
     steps:
       # Downloads all artifacts to the current working directory
-      - name: Download archives
-        uses: actions/download-artifact@v2
+    - name: Download archives
+      uses: actions/download-artifact@v2
 
-      - name: List archives
-        run: ls -R
+    - name: List archives
+      run: ls -R
