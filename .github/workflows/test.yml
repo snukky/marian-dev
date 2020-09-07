@@ -1,0 +1,30 @@
+name: Release
+
+on:
+  push:
+    branches: [ master ]
+
+jobs:
+  test:
+    runs-on: ubuntu-18.04
+
+    strategy:
+      matrix:
+        include:
+          - mystring: name1
+            mybool: false
+          - mystring: name2
+            mybool: true
+
+    steps:
+    - name: Check if name1
+      run: echo ${{ matrix.mystring }} ${{ matrix.mybool }}
+      if: matrix.mystring == 'name1'
+
+    - name: Check if bool
+      run: echo ${{ matrix.mystring }} ${{ matrix.mybool }}
+      if: matrix.bool == 'true'
+
+    - name: Run always
+      run: echo ${{ matrix.mystring }} ${{ matrix.mybool }}
+
