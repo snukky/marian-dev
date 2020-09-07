@@ -126,7 +126,7 @@ jobs:
     - name: Download MKL
       run: |
         C:\msys64\usr\bin\wget.exe -nv https://romang.blob.core.windows.net/mariandev/ci/mkl-2020.1-windows-static.zip -O mkl.zip
-        7z.exe e -y mkl.zip -o ${{ github.workspace }}\mkl
+        7z e -y mkl.zip -o ${{ github.workspace }}\mkl
         # Set the MKLROOT environment variable so that CMake can find MKL.
         # GITHUB_WORKSPACE is an environment variable available on all GitHub-hosted runners
         echo "::set-env name=MKLROOT::$env:GITHUB_WORKSPACE/mkl"
@@ -171,7 +171,7 @@ jobs:
         useVcpkgToolchainFile: true
 
     - name: Create archive
-      run: 7z.exe a ../${{ env.archive_name }}.zip marian*.exe ../README.md ../LICENSE.md
+      run: 7z a ../${{ env.archive_name }}.zip marian*.exe ../README.md ../LICENSE.md
       shell: powershell
       working-directory: build
 
