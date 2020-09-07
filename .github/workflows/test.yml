@@ -23,7 +23,7 @@ jobs:
 
     - name: Check if bool
       run: echo ${{ matrix.mystring }} ${{ matrix.mybool }}
-      if: matrix.bool == 'true'
+      if: matrix.mybool == 'true'
 
     - name: Run always
       run: echo ${{ matrix.mystring }} ${{ matrix.mybool }}
