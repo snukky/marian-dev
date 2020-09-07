@@ -132,13 +132,13 @@ jobs:
       uses: actions/download-artifact@v2
 
     # Artifacts are downloaded into directories with the same names as actual files
-    # Unpack them
+    # They are moved to a common directory ./assets/
     - name: Prepare archives
       run: |
-        for f in `ls -d ${{ github.event.repository.name }}-*`; do mv $f $f.dir; done
-        mv *.dir/* .
-        rmdir *.dir
-        ls -lh
+        mkdir -p assets
+        mv ${{ github.event.repository.name }}-*/* assets/
+        rmdir ${{ github.event.repository.name }}-*
+        ls -lh assets/
 
     - name: Release
       uses: softprops/action-gh-release@v1
@@ -148,8 +148,6 @@ jobs:
       with:
         draft: true
         files: |
-          ${{ github.event.repository.name }}-v0.0.0_linux-x64_cpu.tar.gz
-          ${{ github.event.repository.name }}-v0.0.0_linux-x64_cpu-fbgemm.tar.gz
-          ${{ github.event.repository.name }}-v0.0.0_windows-x64_cpu.zip
-          ${{ github.event.repository.name }}-v0.0.0_windows-x64_cpu-fbgemm.zip
+          assets/*.zip
+          assets/*.tar.gz
         prerelease: true
