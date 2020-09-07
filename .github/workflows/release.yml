@@ -17,9 +17,12 @@ jobs:
           - suffix: cpu
             fbgemm: false
             cuda: false
-          - suffix: cuda-fbgemm
+          - suffix: cpu-fbgemm
             fbgemm: true
-            cuda: true
+            cuda: false
+          #- suffix: cuda-fbgemm
+            #fbgemm: true
+            #cuda: true
 
     env:
       cuda_version: "10.2"
@@ -92,7 +95,7 @@ jobs:
 
     - name: Create archive
       working-directory: build
-      run: tar zcvf ../${{ env.archive_name }}.tar.gz marian* ../README.md ../LICENSE.md
+      run: tar zcvf ../${{ env.archive_name }}.tar.gz marian* ../README.md
 
     - name: Upload archive
       uses: actions/upload-artifact@v2
@@ -172,7 +175,9 @@ jobs:
         useVcpkgToolchainFile: true
 
     - name: Create archive
-      run: Compress-Archive -Path marian*.exe ../README.md ../LICENSE.md -DestinationPath ../${{ env.archive_name }}.zip
+      run: |
+        cp ../README.md .
+        Compress-Archive -Path marian*.exe,README.md -DestinationPath ../${{ env.archive_name }}.zip
       shell: powershell
       working-directory: build
 
