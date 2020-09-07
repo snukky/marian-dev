@@ -6,7 +6,7 @@ on:
 
 jobs:
   test:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-latest
 
     strategy:
       matrix:
@@ -15,6 +15,8 @@ jobs:
             mybool: false
           - mystring: name2
             mybool: true
+    env:
+      PREFIX: foo-${{ matrix.mybool }}_bar-${{ matrix.mybool }}
 
     steps:
     - name: Check if name1
@@ -23,8 +25,12 @@ jobs:
 
     - name: Check if bool
       run: echo ${{ matrix.mystring }} ${{ matrix.mybool }}
-      if: matrix.mybool == 'true'
+      if: matrix.mybool == true
 
     - name: Run always
-      run: echo ${{ matrix.mystring }} ${{ matrix.mybool }}
+      run: |
+        mkdir temp
+        echo " == ${{ env.PREFIX }} =="
+        echo ${{ matrix.mystring }} ${{ matrix.mybool }}
+
 

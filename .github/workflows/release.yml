@@ -2,9 +2,12 @@ name: Release
 
 on:
   push:
-    #branches: [ master ]
-    tags:
-      - "test-v*.*.*"
+    branches: [ master ]
+    #tags:
+      #- "test-v*.*.*"
+
+env:
+  cuda_version: "10.2"
 
 jobs:
   build-release-ubuntu:
@@ -13,56 +16,90 @@ jobs:
     strategy:
       matrix:
         include:
-          - name: ${{ github.event.repository.name }}-v0.0.0_linux-x64_cpu
+          - suffix: cpu
             fbgemm: false
             cuda: false
-          - name: ${{ github.event.repository.name }}-v0.0.0_linux-x64_cpu-fbgemm
+          - suffix: cuda-fbgemm
             fbgemm: true
-            cuda: false
-          #- name: ${{ github.event.repository.name }}-v0.0.0_linux-x64_cuda10.2
-            #fbgemm: false
-            #cuda: true
-          #- name: ${{ github.event.repository.name }}-v0.0.0_linux-x64_cuda10.2-fbgemm
-            #fbgemm: true
-            #cuda: true
+            cuda: true
+
+    env:
+      archive_name: ${{ github.event.repository.name }}-v0.0.0_linux-x64_${{ matrix.suffix }}
 
     steps:
-    - name: Dump GitHub context
-      env:
-        GITHUB_CONTEXT: ${{ toJson(github) }}
-        JOB_CONTEXT: ${{ toJson(job) }}
-        STEPS_CONTEXT: ${{ toJson(steps) }}
-        RUNNER_CONTEXT: ${{ toJson(runner) }}
-        STRATEGY_CONTEXT: ${{ toJson(strategy) }}
-        MATRIX_CONTEXT: ${{ toJson(matrix) }}
-      run: |
-        echo "### GITHUB_CONTEXT"
-        echo "$GITHUB_CONTEXT"
-        echo "### JOB_CONTEXT"
-        echo "$JOB_CONTEXT"
-        echo "### STEPS_CONTEXT"
-        echo "$STEPS_CONTEXT"
-        echo "### RUNNER_CONTEXT"
-        echo "$RUNNER_CONTEXT"
-        echo "### STRATEGY_CONTEXT"
-        echo "$STRATEGY_CONTEXT"
-        echo "### MATRIX_CONTEXT"
-        echo "$MATRIX_CONTEXT"
+    #- name: Dump GitHub context
+      #env:
+        #GITHUB_CONTEXT: ${{ toJson(github) }}
+        #JOB_CONTEXT: ${{ toJson(job) }}
+        #STEPS_CONTEXT: ${{ toJson(steps) }}
+        #RUNNER_CONTEXT: ${{ toJson(runner) }}
+        #STRATEGY_CONTEXT: ${{ toJson(strategy) }}
+        #MATRIX_CONTEXT: ${{ toJson(matrix) }}
+      #run: |
+        #echo "$GITHUB_CONTEXT"
+        #echo "$JOB_CONTEXT"
+        #echo "$STEPS_CONTEXT"
+        #echo "$RUNNER_CONTEXT"
+        #echo "$STRATEGY_CONTEXT"
+        #echo "$MATRIX_CONTEXT"
 
     - name: Checkout
       uses: actions/checkout@v2
       with:
         submodules: recursive
 
-    # Mock task
+    # The following packages are already installed on GitHub-hosted runners: build-essential openssl libssl-dev
+    # No need to install libprotobuf{17,10,9v5} on Ubuntu {20,18,16}.04 because it is installed together with libprotobuf-dev
+    - name: Install dependencies
+      run: sudo apt-get install -y libgoogle-perftools-dev libprotobuf-dev protobuf-compiler
+
+    # https://software.intel.com/content/www/us/en/develop/articles/installing-intel-free-libs-and-python-apt-repo.html
+    - name: Install MKL
+      run: |
+        wget -qO- "https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS-2019.PUB" | sudo apt-key add -
+        sudo sh -c "echo deb https://apt.repos.intel.com/mkl all main > /etc/apt/sources.list.d/intel-mkl.list"
+        sudo apt-get update -o Dir::Etc::sourcelist="/etc/apt/sources.list.d/intel-mkl.list"
+        sudo apt-get install -y --no-install-recommends intel-mkl-64bit-2020.0-088
+
+    # The script simplifies installation of different versions of CUDA
+    - name: Install CUDA
+      run: ./scripts/ci/install_cuda_ubuntu.sh ${{ env.cuda_version }}
+      if: matrix.cuda == true
+
+    # Boost is already installed on GitHub-hosted runners in a non-standard location
+    # https://github.com/actions/virtual-environments/issues/687#issuecomment-610471671
+    - name: Configure CMake
+      run: |
+        mkdir -p build
+        cd build
+        CC=/usr/bin/gcc-8 CXX=/usr/bin/g++-8 CUDAHOSTCXX=/usr/bin/g++-8 \
+        cmake .. \
+          -DBoost_ARCHITECTURE=-x64 \
+          -DBOOST_INCLUDEDIR=$BOOST_ROOT_1_69_0/include \
+          -DBOOST_LIBRARYDIR=$BOOST_ROOT_1_69_0/lib \
+          -DBOOST_ROOT=$BOOST_ROOT_1_69_0 \
+          -DCMAKE_BUILD_TYPE=Release \
+          -DCOMPILE_CPU=on \
+          -DCOMPILE_CUDA=${{ matrix.cuda }} \
+          -DCOMPILE_SERVER=on \
+          -DCUDA_TOOLKIT_ROOT_DIR=/usr/local/cuda-${{ env.cuda_version }} \
+          -DUSE_FBGEMM=${{ matrix.fbgemm }} \
+          -DUSE_SENTENCEPIECE=on \
+          -DUSE_STATIC_LIBS=on \
+
+    - name: Compile
+      working-directory: build
+      run: make -j2
+
     - name: Create archive
-      run: tar zcvf ${{ matrix.name }}.tar.gz README.md VERSION
+      working-directory: build
+      run: tar zcvf ../${{ env.archive_name }}.tar.gz marian* ../README.md ../LICENSE.md
 
     - name: Upload archive
       uses: actions/upload-artifact@v2
       with:
-        name: ${{ matrix.name }}.tar.gz
-        path: ${{ matrix.name }}.tar.gz
+        name: ${{ env.archive_name }}.tar.gz
+        path: ${{ env.archive_name }}.tar.gz
 
   build-release-windows:
     runs-on: windows-2019
@@ -70,56 +107,79 @@ jobs:
     strategy:
       matrix:
         include:
-          - name: ${{ github.event.repository.name }}-v0.0.0_windows-x64_cpu
+          - suffix: cpu
             fbgemm: false
             cuda: false
-          - name: ${{ github.event.repository.name }}-v0.0.0_windows-x64_cpu-fbgemm
+          - suffix: cuda-fbgemm
             fbgemm: true
-            cuda: false
-          #- name: ${{ github.event.repository.name }}-v0.0.0_windows-x64_cuda10.2
-            #fbgemm: false
-            #cuda: true
-          #- name: ${{ github.event.repository.name }}-v0.0.0_windows-x64_cuda10.2-fbgemm
-            #fbgemm: true
-            #cuda: true
-    steps:
-    - name: Dump GitHub context
-      env:
-        GITHUB_CONTEXT: ${{ toJson(github) }}
-        JOB_CONTEXT: ${{ toJson(job) }}
-        STEPS_CONTEXT: ${{ toJson(steps) }}
-        RUNNER_CONTEXT: ${{ toJson(runner) }}
-        STRATEGY_CONTEXT: ${{ toJson(strategy) }}
-        MATRIX_CONTEXT: ${{ toJson(matrix) }}
-      run: |
-        echo "### GITHUB_CONTEXT"
-        echo "$GITHUB_CONTEXT"
-        echo "### JOB_CONTEXT"
-        echo "$JOB_CONTEXT"
-        echo "### STEPS_CONTEXT"
-        echo "$STEPS_CONTEXT"
-        echo "### RUNNER_CONTEXT"
-        echo "$RUNNER_CONTEXT"
-        echo "### STRATEGY_CONTEXT"
-        echo "$STRATEGY_CONTEXT"
-        echo "### MATRIX_CONTEXT"
-        echo "$MATRIX_CONTEXT"
+            cuda: true
 
+    env:
+      archive_name: ${{ github.event.repository.name }}-v0.0.0_windows-x64_${{ matrix.suffix }}
+
+    steps:
     - name: Checkout
       uses: actions/checkout@v2
       with:
         submodules: recursive
 
-    # Mock task
-    - name: Create archive
-      run: 7z a ${{ matrix.name }}.zip README.md VERSION
+    - name: Download MKL
+      run: |
+        C:\msys64\usr\bin\wget.exe -nv https://romang.blob.core.windows.net/mariandev/ci/mkl-2020.1-windows-static.zip -O mkl.zip
+        7z.exe e -y mkl.zip -o ${{ github.workspace }}\mkl
+        # Set the MKLROOT environment variable so that CMake can find MKL.
+        # GITHUB_WORKSPACE is an environment variable available on all GitHub-hosted runners
+        echo "::set-env name=MKLROOT::$env:GITHUB_WORKSPACE/mkl"
       shell: powershell
+
+    - name: Install CUDA
+      run: |
+        .\scripts\ci\install_cuda_windows.ps1 ${{ env.cuda_version }}
+        # Set path to CUDA for subsequent steps so that CMake can find it
+        echo "::set-env name=CUDA_PATH::$env:CUDA_PATH"
+        echo "::add-path::$env:CUDA_PATH/bin"
+      shell: powershell
+      if: matrix.cuda == true
+
+    - name: Prepare vcpkg
+      uses: lukka/run-vcpkg@v2
+      with:
+        vcpkgArguments: protobuf
+        vcpkgGitCommitId: 6185aa76504a5025f36754324abf307cc776f3da
+        vcpkgDirectory: ${{ github.workspace }}/vcpkg/
+        vcpkgTriplet: x64-windows-static
+
+    # Build with a simplified CMake settings JSON file
+    - name: Run CMake
+      uses: lukka/run-cmake@v2
+      with:
+        buildDirectory: ${{ github.workspace }}/build/
+        cmakeAppendedArgs: '-G Ninja
+          -DCMAKE_BUILD_TYPE="Release"
+          -DOPENSSL_USE_STATIC_LIBS="TRUE"
+          -DOPENSSL_MSVC_STATIC_RT="TRUE"
+          -DCOMPILE_CPU="TRUE"
+          -DCOMPILE_CUDA="${{ matrix.cuda }}"
+          -DCOMPILE_SERVER="FALSE"
+          -DUSE_FBGEMM="${{ matrix.fbgemm }}"
+          -DUSE_MPI="FALSE"
+          -DUSE_NCCL="FALSE"
+          -DUSE_SENTENCEPIECE="TRUE"
+          -DUSE_STATIC_LIBS="TRUE"'
+        cmakeListsOrSettingsJson: CMakeListsTxtAdvanced
+        cmakeListsTxtPath: ${{ github.workspace }}/CMakeLists.txt
+        useVcpkgToolchainFile: true
+
+    - name: Create archive
+      run: 7z.exe a ../${{ env.archive_name }}.zip marian*.exe ../README.md ../LICENSE.md
+      shell: powershell
+      working-directory: build
 
     - name: Upload archive
       uses: actions/upload-artifact@v2
       with:
-        name: ${{ matrix.name }}.zip
-        path: ${{ matrix.name }}.zip
+        name: ${{ env.archive_name }}.zip
+        path: ${{ env.archive_name }}.zip
 
   release:
     needs: [build-release-ubuntu, build-release-windows]
@@ -140,14 +200,14 @@ jobs:
         rmdir ${{ github.event.repository.name }}-*
         ls -lh assets/
 
-    - name: Release
-      uses: softprops/action-gh-release@v1
-      #if: startsWith(github.ref, 'refs/tags/')
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        draft: true
-        files: |
-          assets/*.zip
-          assets/*.tar.gz
-        prerelease: true
+    #- name: Release
+      #uses: softprops/action-gh-release@v1
+      ##if: startsWith(github.ref, 'refs/tags/')
+      #env:
+        #GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #with:
+        #draft: true
+        #files: |
+          #assets/*.zip
+          #assets/*.tar.gz
+        #prerelease: true
