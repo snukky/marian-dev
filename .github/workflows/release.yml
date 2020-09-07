@@ -139,9 +139,9 @@ jobs:
     - name: Release
       uses: softprops/action-gh-release@v1
       #if: startsWith(github.ref, 'refs/tags/')
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         draft: true
         files: |
           ${{ github.event.repository.name }}-v0.0.0_linux-x64_cpu.tar.gz
