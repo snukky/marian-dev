@@ -131,9 +131,13 @@ jobs:
     - name: Download archives
       uses: actions/download-artifact@v2
 
+    # Artifacts are downloaded into directories with the same names as actual files
+    # Unpack them
     - name: Prepare archives
       run: |
-        mv ${{ github.event.repository.name }}-*/* .
+        for f in `ls -d ${{ github.event.repository.name }}-*`; do mv $f $f.dir; done
+        mv *.dir/* .
+        rmdir *.dir
         ls -lh
 
     - name: Release
