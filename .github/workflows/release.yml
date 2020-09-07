@@ -2,9 +2,9 @@ name: Release
 
 on:
   push:
-    branches: [ master ]
-    #tags:
-      #- "test-v*.*.*"
+    #branches: [ master ]
+    tags:
+      - "test-v*.*.*"
 
 jobs:
   build-release-ubuntu:
