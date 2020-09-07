@@ -6,10 +6,8 @@ on:
     #tags:
       #- "test-v*.*.*"
 
-env:
-  cuda_version: "10.2"
-
 jobs:
+  ######################################################################
   build-release-ubuntu:
     runs-on: ubuntu-18.04
 
@@ -24,6 +22,7 @@ jobs:
             cuda: true
 
     env:
+      cuda_version: "10.2"
       archive_name: ${{ github.event.repository.name }}-v0.0.0_linux-x64_${{ matrix.suffix }}
 
     steps:
@@ -101,6 +100,7 @@ jobs:
         name: ${{ env.archive_name }}.tar.gz
         path: ${{ env.archive_name }}.tar.gz
 
+  ######################################################################
   build-release-windows:
     runs-on: windows-2019
 
@@ -116,6 +116,7 @@ jobs:
 
     env:
       archive_name: ${{ github.event.repository.name }}-v0.0.0_windows-x64_${{ matrix.suffix }}
+      cuda_version: "10.2"
 
     steps:
     - name: Checkout
@@ -126,7 +127,7 @@ jobs:
     - name: Download MKL
       run: |
         C:\msys64\usr\bin\wget.exe -nv https://romang.blob.core.windows.net/mariandev/ci/mkl-2020.1-windows-static.zip -O mkl.zip
-        7z e -y mkl.zip -o ${{ github.workspace }}\mkl
+        Expand-Archive -Force mkl.zip ${{ github.workspace }}\mkl
         # Set the MKLROOT environment variable so that CMake can find MKL.
         # GITHUB_WORKSPACE is an environment variable available on all GitHub-hosted runners
         echo "::set-env name=MKLROOT::$env:GITHUB_WORKSPACE/mkl"
@@ -171,7 +172,7 @@ jobs:
         useVcpkgToolchainFile: true
 
     - name: Create archive
-      run: 7z a ../${{ env.archive_name }}.zip marian*.exe ../README.md ../LICENSE.md
+      run: Compress-Archive -Path marian*.exe ../README.md ../LICENSE.md -DestinationPath ../${{ env.archive_name }}.zip
       shell: powershell
       working-directory: build
 
