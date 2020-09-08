@@ -20,19 +20,19 @@ jobs:
           - suffix: cpu
             fbgemm: false
             cuda: false
-          - suffix: cpu-fbgemm
-            fbgemm: true
-            cuda: false
-          - suffix: cuda
-            fbgemm: false
-            cuda: true
-          - suffix: cuda-fbgemm
+          #- suffix: cpu-fbgemm
+            #fbgemm: true
+            #cuda: false
+          #- suffix: cuda${{ env.cuda_version }}
+            #fbgemm: false
+            #cuda: true
+          - suffix: cuda${{ env.cuda_version }}-fbgemm
             fbgemm: true
             cuda: true
 
     steps:
     # Set env.github_tag_name and env.archive_name for subsequent steps
-    - name: Set archive name
+    - name: Archive name
       run: |
         # Get the tag name only to use it in the archive name. The variable github.ref can not be used because it starts with refs/tags/
         TAG_NAME=$(echo ${{ github.ref }} | cut -d/ -f3-)
@@ -93,7 +93,7 @@ jobs:
 #     working-directory: build
 #     run: tar zcvf ../${{ env.archive_name }}.tar.gz marian* ../README.md
 
-    - name: Create archive
+    - name: Test archive
       run: tar zcvf ${{ env.archive_name }}.tar.gz README.md
 
     - name: Upload archive
@@ -115,22 +115,22 @@ jobs:
           - suffix: cpu-fbgemm
             fbgemm: true
             cuda: false
-          - suffix: cuda
+          - suffix: cuda${{ env.cuda_version }}
             fbgemm: false
             cuda: true
-          - suffix: cuda-fbgemm
+          - suffix: cuda${{ env.cuda_version }}-fbgemm
             fbgemm: true
             cuda: true
 
     steps:
     # Set env.github_tag_name and env.archive_name for subsequent steps
-    - name: Set archive name
+    - name: Archive name
       run: |
         # Get the tag name only to use it in the archive name. The variable github.ref can not be used because it starts with refs/tags/
         TAG_NAME=$(echo ${{ github.ref }} | cut -d/ -f3-)
         # https://docs.github.com/en/actions/reference/workflow-commands-for-github-actions#setting-an-environment-variable
         echo "::set-env name=github_tag_name::${TAG_NAME}"
-        echo "::set-env name=archive_name::${{ github.event.repository.name }}-${TAG_NAME}_linux-x64-static_${{ matrix.suffix }}"
+        echo "::set-env name=archive_name::${{ github.event.repository.name }}-${TAG_NAME}_windows-x64_${{ matrix.suffix }}"
       shell: bash
 
     - name: Checkout
@@ -209,9 +209,18 @@ jobs:
     runs-on: ubuntu-18.04
 
     steps:
-      # Downloads all artifacts to the current working directory
+    # Downloads all artifacts to the current working directory
     - name: Download archives
       uses: actions/download-artifact@v2
+
+    - name: Checkout
+      uses: actions/checkout@v2
+      with:
+        submodules: false  # the repo is needed only for CHANGELOG, so submodules are not needed
+
+    # Extract entire markdown text from the [Unreleased] section to be used as the release description
+    - name: Extract changelog
+      run: cat CHANGELOG.md | sed -n "/^## \[Unreleased\]/,/^## \[[0-9]/p;/^## \[[0-9]/q" | sed '1d;$d' > RELEASE_${{ env.github_tag_name }}.md
 
     # Artifacts are downloaded into directories with the same names as actual files
     # They are moved to a common directory ./assets/
@@ -228,8 +237,9 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
+        body_path: RELEASE_${{ env.github_tag_name }}.md
         draft: true
         files: |
           assets/*.zip
           assets/*.tar.gz
-        prerelease: true
+        prerelease: false
