@@ -5,6 +5,10 @@ on:
     tags:
       - "test-v*.*.*"
 
+env:
+  cuda_version: "10.2"
+  gcc_version: 8
+
 jobs:
   ######################################################################
   build-release-ubuntu:
@@ -13,40 +17,29 @@ jobs:
     strategy:
       matrix:
         include:
-          #- suffix: cpu
-            #fbgemm: false
-            #cuda: false
+          - suffix: cpu
+            fbgemm: false
+            cuda: false
           - suffix: cpu-fbgemm
             fbgemm: true
             cuda: false
-          #- suffix: cuda
-            #fbgemm: false
-            #cuda: true
-          #- suffix: cuda-fbgemm
-            #fbgemm: true
-            #cuda: true
-
-    env:
-      archive_name: ${{ github.event.repository.name }}-${{ github.ref }}_linux-x64-static_${{ matrix.suffix }}
-      cuda_version: "10.2"
-      gcc_version: 8
+          - suffix: cuda
+            fbgemm: false
+            cuda: true
+          - suffix: cuda-fbgemm
+            fbgemm: true
+            cuda: true
 
     steps:
-    #- name: Dump GitHub context
-      #env:
-        #GITHUB_CONTEXT: ${{ toJson(github) }}
-        #JOB_CONTEXT: ${{ toJson(job) }}
-        #STEPS_CONTEXT: ${{ toJson(steps) }}
-        #RUNNER_CONTEXT: ${{ toJson(runner) }}
-        #STRATEGY_CONTEXT: ${{ toJson(strategy) }}
-        #MATRIX_CONTEXT: ${{ toJson(matrix) }}
-      #run: |
-        #echo "$GITHUB_CONTEXT"
-        #echo "$JOB_CONTEXT"
-        #echo "$STEPS_CONTEXT"
-        #echo "$RUNNER_CONTEXT"
-        #echo "$STRATEGY_CONTEXT"
-        #echo "$MATRIX_CONTEXT"
+    # Set env.github_tag_name and env.archive_name for subsequent steps
+    - name: Set archive name
+      run: |
+        # Get the tag name only to use it in the archive name. The variable github.ref can not be used because it starts with refs/tags/
+        TAG_NAME=$(echo ${{ github.ref }} | cut -d/ -f3-)
+        # https://docs.github.com/en/actions/reference/workflow-commands-for-github-actions#setting-an-environment-variable
+        echo "::set-env name=github_tag_name::${TAG_NAME}"
+        echo "::set-env name=archive_name::${{ github.event.repository.name }}-${TAG_NAME}_linux-x64-static_${{ matrix.suffix }}"
+      shell: bash
 
     - name: Checkout
       uses: actions/checkout@v2
@@ -129,11 +122,17 @@ jobs:
             fbgemm: true
             cuda: true
 
-    env:
-      archive_name: ${{ github.event.repository.name }}-${{ github.ref }}_windows-x64_${{ matrix.suffix }}
-      cuda_version: "10.2"
-
     steps:
+    # Set env.github_tag_name and env.archive_name for subsequent steps
+    - name: Set archive name
+      run: |
+        # Get the tag name only to use it in the archive name. The variable github.ref can not be used because it starts with refs/tags/
+        TAG_NAME=$(echo ${{ github.ref }} | cut -d/ -f3-)
+        # https://docs.github.com/en/actions/reference/workflow-commands-for-github-actions#setting-an-environment-variable
+        echo "::set-env name=github_tag_name::${TAG_NAME}"
+        echo "::set-env name=archive_name::${{ github.event.repository.name }}-${TAG_NAME}_linux-x64-static_${{ matrix.suffix }}"
+      shell: bash
+
     - name: Checkout
       uses: actions/checkout@v2
       with:

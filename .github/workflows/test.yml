@@ -6,7 +6,7 @@ on:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
 
     strategy:
       matrix:
@@ -19,18 +19,58 @@ jobs:
       PREFIX: foo-${{ matrix.mybool }}_bar-${{ matrix.mybool }}
 
     steps:
+    - name: Dump GitHub context
+      env:
+        GITHUB_CONTEXT: ${{ toJson(github) }}
+        JOB_CONTEXT: ${{ toJson(job) }}
+        STEPS_CONTEXT: ${{ toJson(steps) }}
+        RUNNER_CONTEXT: ${{ toJson(runner) }}
+        STRATEGY_CONTEXT: ${{ toJson(strategy) }}
+        MATRIX_CONTEXT: ${{ toJson(matrix) }}
+      run: |
+        echo "$GITHUB_CONTEXT"
+        echo "$JOB_CONTEXT"
+        echo "$STEPS_CONTEXT"
+        echo "$RUNNER_CONTEXT"
+        echo "$STRATEGY_CONTEXT"
+        echo "$MATRIX_CONTEXT"
+
+    - name: Archive name
+      run: |
+        # https://docs.github.com/en/actions/reference/workflow-commands-for-github-actions#setting-an-environment-variable
+        # Get the tag name only to use it in the archive name. The variable github.ref can not be used because it starts with refs/tags/
+        TAG_NAME=$(echo ${{ github.ref }} | cut -d/ -f3-)
+        echo "::set-env name=github_tag_name::${TAG_NAME}"
+        echo "::set-env name=archive_name::${{ github.event.repository.name }}-${TAG_NAME}_linux-x64-static_${{ matrix.suffix }}"
+      shell: bash
+
     - name: Check if name1
       run: echo ${{ matrix.mystring }} ${{ matrix.mybool }}
       if: matrix.mystring == 'name1'
+      shell: bash
 
     - name: Check if bool
       run: echo ${{ matrix.mystring }} ${{ matrix.mybool }}
       if: matrix.mybool == true
+      shell: bash
 
     - name: Run always
       run: |
         mkdir temp
         echo " == ${{ env.PREFIX }} =="
         echo ${{ matrix.mystring }} ${{ matrix.mybool }}
+      shell: bash
 
+    - name: Set selected color
+      run: echo '::set-env name=SELECTED_COLOR::green'
+      shell: bash
 
+    - name: Get color
+      run: echo 'The selected color is' $SELECTED_COLOR
+      shell: bash
+
+    - name: Get color from env
+      run: echo 'The copy of selected color is' $COLOR_TWO
+      env:
+        COLOR_TWO: ${{ env.SELECTED_COLOR }}
+      shell: bash
