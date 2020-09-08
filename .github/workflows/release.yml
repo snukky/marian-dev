@@ -23,10 +23,10 @@ jobs:
           #- suffix: cpu-fbgemm
             #fbgemm: true
             #cuda: false
-          #- suffix: cuda${{ env.cuda_version }}
+          #- suffix: cuda10.2
             #fbgemm: false
             #cuda: true
-          - suffix: cuda${{ env.cuda_version }}-fbgemm
+          - suffix: cuda10.2-fbgemm
             fbgemm: true
             cuda: true
 
@@ -115,10 +115,10 @@ jobs:
           - suffix: cpu-fbgemm
             fbgemm: true
             cuda: false
-          - suffix: cuda${{ env.cuda_version }}
+          - suffix: cuda10.2
             fbgemm: false
             cuda: true
-          - suffix: cuda${{ env.cuda_version }}-fbgemm
+          - suffix: cuda10.2-fbgemm
             fbgemm: true
             cuda: true
 
@@ -220,7 +220,9 @@ jobs:
 
     # Extract entire markdown text from the [Unreleased] section to be used as the release description
     - name: Extract changelog
-      run: cat CHANGELOG.md | sed -n "/^## \[Unreleased\]/,/^## \[[0-9]/p;/^## \[[0-9]/q" | sed '1d;$d' > RELEASE_${{ env.github_tag_name }}.md
+      run: |
+        cat CHANGELOG.md | sed -n "/^## \[Unreleased\]/,/^## \[[0-9]/p;/^## \[[0-9]/q" | sed '1d;$d' > RELEASE.md
+        cat RELEASE.md
 
     # Artifacts are downloaded into directories with the same names as actual files
     # They are moved to a common directory ./assets/
@@ -237,7 +239,7 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        body_path: RELEASE_${{ env.github_tag_name }}.md
+        body_path: RELEASE.md
         draft: true
         files: |
           assets/*.zip
