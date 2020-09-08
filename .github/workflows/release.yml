@@ -209,10 +209,6 @@ jobs:
     runs-on: ubuntu-18.04
 
     steps:
-    # Downloads all artifacts to the current working directory
-    - name: Download archives
-      uses: actions/download-artifact@v2
-
     - name: Checkout
       uses: actions/checkout@v2
       with:
@@ -223,6 +219,10 @@ jobs:
       run: |
         cat CHANGELOG.md | sed -n "/^## \[Unreleased\]/,/^## \[[0-9]/p;/^## \[[0-9]/q" | sed '1d;$d' > RELEASE.md
         cat RELEASE.md
+
+    # Downloads all artifacts to the current working directory
+    - name: Download archives
+      uses: actions/download-artifact@v2
 
     # Artifacts are downloaded into directories with the same names as actual files
     # They are moved to a common directory ./assets/
