@@ -94,7 +94,7 @@ jobs:
 #     run: tar zcvf ../${{ env.archive_name }}.tar.gz marian* ../README.md
 
     - name: Create archive
-      run: tar zcvf ${{ env.archive_name }}.tar.gz ../README.md
+      run: tar zcvf ${{ env.archive_name }}.tar.gz README.md
 
     - name: Upload archive
       uses: actions/upload-artifact@v2
