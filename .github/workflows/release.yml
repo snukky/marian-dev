@@ -40,6 +40,8 @@ jobs:
     strategy:
       matrix:
         include:
+          # No builds with FBGEMM because they are not portable enough
+          # requiring same CPU architecture at compilation and runtime
           - suffix: cpu
             fbgemm: false
             cuda: false
@@ -92,7 +94,7 @@ jobs:
           -DBOOST_INCLUDEDIR=$BOOST_ROOT_1_69_0/include \
           -DBOOST_LIBRARYDIR=$BOOST_ROOT_1_69_0/lib \
           -DBOOST_ROOT=$BOOST_ROOT_1_69_0 \
-          -DCMAKE_BUILD_TYPE=Release \
+          -DCMAKE_BUILD_TYPE=Slim \
           -DCOMPILE_CPU=on \
           -DCOMPILE_CUDA=${{ matrix.cuda }} \
           -DCOMPILE_SERVER=on \
@@ -125,6 +127,8 @@ jobs:
     strategy:
       matrix:
         include:
+          # No builds with FBGEMM because they are not portable enough
+          # requiring same CPU architecture at compilation and runtime
           - suffix: cpu
             fbgemm: false
             cuda: false
@@ -235,7 +239,7 @@ jobs:
     - name: Download archives
       uses: actions/download-artifact@v2
 
-    # Artifacts are downloaded into directories with the same names as actual files
+    # Artifacts are downloaded into directories with the same names as actual files.
     # They are moved to a common directory ./assets/
     - name: Prepare archives
       run: |
