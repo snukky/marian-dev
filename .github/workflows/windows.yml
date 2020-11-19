@@ -46,8 +46,8 @@ jobs:
       run: |
         .\scripts\ci\install_cuda_windows.ps1 "10.2"
         # Set CUDA_PATH environment variable so that CMake can find CUDA
-        echo "$env:CUDA_PATH/bin"       | Out-File -FilePath $env:GITHUB_ENV  -Encoding utf8 -Append
-        echo "CUDA_PATH=$env:CUDA_PATH" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+        echo "CUDA_PATH=$env:CUDA_PATH" | Out-File -FilePath $env:GITHUB_ENV  -Encoding utf8 -Append
+        echo "$env:CUDA_PATH/bin"       | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
       shell: powershell
       if: matrix.gpu == true
 
@@ -90,7 +90,7 @@ jobs:
     # https://github.com/actions/virtual-environments/blob/main/images/win/Windows2019-Readme.md#boost
     # (not used yet)
     - name: Build Release
-      uses: lukka/run-cmake@v2
+      uses: lukka/run-cmake@v3
       with:
         buildDirectory: ${{ github.workspace }}/build/
         cmakeAppendedArgs: '-G Ninja
